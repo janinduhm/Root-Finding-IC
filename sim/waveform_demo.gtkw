@@ -1,0 +1,29 @@
+[*]
+[*] GTKWave Analyzer save file
+[dumpfile] "waveform_demo.vcd"
+[timestart] 0
+[size] 1400 800
+[pos] -1 -1
+*-16.000000 0 (24)stk
+[treeopen] tb_waveform_demo.
+[treeopen] tb_waveform_demo.dut.
+[treeopen] tb_waveform_demo.dut.u_mau.
+@28
+tb_waveform_demo.Clock
+tb_waveform_demo.Start
+tb_waveform_demo.Reset
+@24
+tb_waveform_demo.dut.u_mau.state[3:0]
+@22
+tb_waveform_demo.dut.u_mau.a_reg[17:0]
+tb_waveform_demo.dut.u_mau.b_reg[17:0]
+tb_waveform_demo.dut.u_mau.c_reg[17:0]
+@28
+tb_waveform_demo.dut.u_mau.n_reg[15:0]
+@22
+tb_waveform_demo.x_hat[17:0]
+@28
+tb_waveform_demo.error
+tb_waveform_demo.Ready
+[pattern_trace] 1
+[pattern_trace] 0
