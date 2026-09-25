@@ -165,6 +165,43 @@ The spec's literal loop condition was `while (|f(c)|>epsilon OR n<=Nmax)`
 point the first term still needs to be false). The corrected condition,
 used here, is `AND`.
 
+## Waveforms
+
+GTKWave traces from `sim/tb_waveform_demo.v` (`omega = 1.0`, `epsilon ≈ 0.001`),
+showing the bracket `a_reg`/`b_reg` and the midpoint `c_reg` closing on the
+root, tracked against the iteration counter `n_reg` and the state encoding:
+
+![Bisection converging](docs/waveform_full.png)
+
+Values are binary16 words in hex. Every `0x38xx` above has `E = 14`, so it
+reads `(1 + frac/1024) × 2⁻¹`:
+
+| word | value | word | value |
+|---|---|---|---|
+| `0x3800` | 0.5 | `0x3874` | 0.556640625 |
+| `0x3840` | 0.53125 | `0x3878` | 0.55859375 |
+| `0x3860` | 0.546875 | `0x3880` | 0.5625 |
+| `0x3870` | 0.5546875 | `0x3900` | 0.625 |
+| `0x3A00` | 0.75 | `0x3C00` | 1.0 |
+
+Note `c_reg` starting at `0x3800` = 0.5 rather than the mangled `0x1E00` that
+bug 4 below produced, and the bracket alternating sides — `b` down to 0.75,
+0.625, 0.5625, then `a` up to 0.53125, 0.546875 — exactly as bisection should.
+
+The closing iterations, where `x_hat` latches:
+
+![Final convergence](docs/waveform_converged.png)
+
+The bracket is `[0x3870, 0x3878]` = `[0.5546875, 0.55859375]` and `c_reg`
+settles at `0x3874` = 0.556640625. By hand,
+`f(0.556640625) = ln(1.556640625) − 0.443359375 ≈ −0.00077`, inside `epsilon`,
+so `UPDATE2` exits — the state row runs `7 → 8 → 12 → 13 → 0`
+(UPDATE1, UPDATE2, ERROR_ST, DONE, IDLE) — and `x_hat` takes `0x3874` with
+`error = 0` and `Ready` asserted.
+
+Every midpoint in that trace can be reproduced by hand from `f(x)` alone; the
+design agrees with real arithmetic to the last bit the format carries.
+
 ## Bugs found during development
 
 Five real bugs, none of which were visible by reading the code in isolation.
@@ -268,7 +305,9 @@ the normalizer's shift counts).
   original assignment spec (`omega, Nmax, epsilon, Start, Reset, Clock`
   in; `x_hat, error, Ready` out).
 - `sim/tb_root_finder.v` — self-checking testbench.
-- `sim/tb_waveform_demo.v` — single-run VCD dump for waveform inspection.
+- `sim/tb_waveform_demo.v` — single-run VCD dump for waveform inspection,
+  with `sim/waveform_demo.gtkw` as its GTKWave signal layout.
+- `docs/` — the waveform captures above.
 
 `src/fp16_arith.v` is duplicated in the original Vivado FPGA project, which
 compiles against its own copy; the header of each names the other. They must be
